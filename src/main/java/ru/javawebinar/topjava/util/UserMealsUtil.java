@@ -26,35 +26,28 @@ public class UserMealsUtil {
 
     public static List<UserMealWithExceed> getFilteredWithExceeded(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
         Map<LocalDate, Integer> caloriesPerDayMap = new HashMap<>();
-        for (UserMeal meal : mealList) {
-            caloriesPerDayMap.merge(getLocalDate(meal), meal.getCalories(), (oldVal, newVal) -> oldVal + newVal);
-        }
+        mealList.forEach(meal -> caloriesPerDayMap.merge(getLocalDate(meal), meal.getCalories(), Integer::sum));
 
         List<UserMealWithExceed> result = new ArrayList<>();
-        for (UserMeal meal : mealList) {
-            if (isValidTime(meal, startTime, endTime)) {
+        mealList.forEach(meal -> {
+            if (TimeUtil.isBetween(meal.getDateTime().toLocalTime(), startTime, endTime))
                 result.add(getUserMealWithExceed(meal, caloriesPerDayMap, caloriesPerDay));
-            }
-        }
+        });
 
         return result;
     }
 
     public static List<UserMealWithExceed> getFilteredWithExceededStream(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
-        Map<LocalDate, Integer> caloriesPerDayMap = mealList.stream().collect(Collectors.toMap(UserMealsUtil::getLocalDate, UserMeal::getCalories, (oldVal, newVal) -> oldVal + newVal));
+        Map<LocalDate, Integer> caloriesPerDayMap = mealList.stream()
+                .collect(Collectors.toMap(UserMealsUtil::getLocalDate, UserMeal::getCalories, Integer::sum));
         return mealList.stream()
-                .filter(meal -> isValidTime(meal, startTime, endTime))
+                .filter(meal -> TimeUtil.isBetween(meal.getDateTime().toLocalTime(), startTime, endTime))
                 .map(meal -> getUserMealWithExceed(meal, caloriesPerDayMap, caloriesPerDay))
                 .collect(Collectors.toList());
     }
 
     private static LocalDate getLocalDate(UserMeal meal) {
         return meal.getDateTime().toLocalDate();
-    }
-
-    private static boolean isValidTime(UserMeal meal, LocalTime startTime, LocalTime endTime) {
-        LocalTime time = meal.getDateTime().toLocalTime();
-        return (time.isAfter(startTime) || time.equals(startTime)) && (time.isBefore(endTime) || time.equals(endTime));
     }
 
     private static UserMealWithExceed getUserMealWithExceed(UserMeal meal, Map<LocalDate, Integer> caloriesPerDayMap, int caloriesPerDay) {
