@@ -39,4 +39,10 @@ public class ValidationUtil {
             throw new IllegalArgumentException(entity + " must be with id=" + id);
         }
     }
+
+    public static void checkEntityPermission(int foreignId, int ownerId) {
+        if (foreignId != ownerId) {
+            throw new IllegalArgumentException("This entity cannot be edited/saved during the current session.");
+        }
+    }
 }
