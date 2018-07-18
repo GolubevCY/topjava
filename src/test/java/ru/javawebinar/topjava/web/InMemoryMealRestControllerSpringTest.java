@@ -11,7 +11,7 @@ import ru.javawebinar.topjava.web.meal.MealRestController;
 
 import static ru.javawebinar.topjava.MealTestData.*;
 
-@ContextConfiguration("classpath:spring/spring-app.xml")
+@ContextConfiguration("classpath:spring/spring-app-inMemoryTest.xml")
 @RunWith(SpringRunner.class)
 public class InMemoryMealRestControllerSpringTest {
 
